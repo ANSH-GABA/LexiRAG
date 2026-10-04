@@ -1,0 +1,139 @@
+# ==============================
+# Python
+# ==============================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.venv.bak/
+venv.bak/
+
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# ==============================
+# Environment Variables & Secrets
+# ==============================
+
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Jupyter Notebook
+# ==============================
+
+.ipynb_checkpoints/
+
+# ==============================
+# IDEs / Editors
+# ==============================
+
+.vscode/
+.idea/
+*.code-workspace
+
+# ==============================
+# OS Files
+# ==============================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# ==============================
+# LexiRAG Data
+# ==============================
+
+# Uploaded/raw documents
+data/raw/
+data/processed/
+
+# Keep folder structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# ==============================
+# Vector Database
+# ==============================
+
+vectorstore/
+chroma/
+chroma_db/
+
+# ==============================
+# Models / Large Files
+# ==============================
+
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# ==============================
+# Logs
+# ==============================
+
+logs/
+*.log
+
+# ==============================
+# Evaluation Outputs
+# ==============================
+
+evaluation/results/
+evaluation/*.csv
+
+# ==============================
+# Temporary Files
+# ==============================
+
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# ==============================
+# Streamlit
+# ==============================
+
+.streamlit/secrets.toml
+
+# ==============================
+# Coverage / Testing
+# ==============================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ==============================
+# Ruff / Mypy
+# ==============================
+
+.ruff_cache/
+.mypy_cache/
+.pyre/

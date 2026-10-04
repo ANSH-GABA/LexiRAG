@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "LexiRAG"
+description = "A multilingual legal and financial document workspace for securely organizing files, asking evidence-grounded questions, comparing agreements, reviewing risks and deadlines, and exporting cited reports."
+version = "1.0.0"
+id = "artifacts/lexirag"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21647
+
+[services.development]
+run = "pnpm --filter @workspace/lexirag run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lexirag", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lexirag/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21647"
+BASE_PATH = "/"

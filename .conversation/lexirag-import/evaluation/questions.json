@@ -1,0 +1,81 @@
+{
+    "evaluation_questions": [
+        {
+            "id": "Q01",
+            "question_english": "What was the total revenue?",
+            "question_hindi": "कुल राजस्व क्या था?",
+            "expected_behavior": "Should answer from document with page citation",
+            "notes": "Test basic English retrieval"
+        },
+        {
+            "id": "Q02",
+            "question_english": "What were the total expenses?",
+            "question_hindi": "कुल खर्च क्या था?",
+            "expected_behavior": "Should answer from document with page citation",
+            "notes": "Test financial data retrieval"
+        },
+        {
+            "id": "Q03",
+            "question_english": "What was the net profit?",
+            "question_hindi": "शुद्ध लाभ क्या था?",
+            "expected_behavior": "Should answer from document with page citation",
+            "notes": "Test profit/loss retrieval"
+        },
+        {
+            "id": "Q04",
+            "question_english": "What is the company's main business activity?",
+            "question_hindi": "कंपनी की मुख्य व्यावसायिक गतिविधि क्या है?",
+            "expected_behavior": "Should describe business from document",
+            "notes": "Test descriptive retrieval"
+        },
+        {
+            "id": "Q05",
+            "question_english": "What were the key risks mentioned?",
+            "question_hindi": "उल्लेखित प्रमुख जोखिम क्या थे?",
+            "expected_behavior": "Should list risks from document",
+            "notes": "Test list-type retrieval"
+        },
+        {
+            "id": "Q06",
+            "question_english": "What is the CEO's favorite sport?",
+            "question_hindi": "सीईओ का पसंदीदा खेल क्या है?",
+            "expected_behavior": "SHOULD SAY: Information not available in documents",
+            "notes": "CRITICAL: Test hallucination prevention. Must not make up an answer."
+        },
+        {
+            "id": "Q07",
+            "question_english": "What is the current stock price?",
+            "question_hindi": "वर्तमान शेयर मूल्य क्या है?",
+            "expected_behavior": "SHOULD SAY: Information not available in documents",
+            "notes": "Test refusal for information not in documents"
+        },
+        {
+            "id": "Q08",
+            "question_english": "How many employees does the company have?",
+            "question_hindi": "कंपनी में कितने कर्मचारी हैं?",
+            "expected_behavior": "Should answer if in document, else say not available",
+            "notes": "Test HR data retrieval"
+        },
+        {
+            "id": "Q09",
+            "question_english": "What were the company's growth plans?",
+            "question_hindi": "कंपनी की विकास योजनाएं क्या थीं?",
+            "expected_behavior": "Should describe future plans from document",
+            "notes": "Test forward-looking statement retrieval"
+        },
+        {
+            "id": "Q10",
+            "question_english": "Summarize the key financial highlights.",
+            "question_hindi": "मुख्य वित्तीय हाइलाइट्स का सारांश दें।",
+            "expected_behavior": "Should provide a bullet-point summary from document",
+            "notes": "Test summarization ability"
+        }
+    ],
+    "evaluation_criteria": {
+        "accuracy": "Is the answer factually correct based on the document?",
+        "grounding": "Does the answer only use information from the provided documents?",
+        "citation": "Does the answer include source document and page number?",
+        "refusal": "For Q06/Q07: Does the system correctly say 'not available'?",
+        "multilingual": "For Hindi questions: Does the system respond in Hindi?"
+    }
+}

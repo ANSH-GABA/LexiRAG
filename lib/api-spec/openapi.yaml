@@ -10,6 +10,16 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: workspaces
+    description: Private workspaces and their document libraries.
+  - name: documents
+    description: PDF upload, indexing, and document access.
+  - name: assistant
+    description: Evidence-grounded multilingual document research.
+  - name: analysis
+    description: Cross-document review and structured extraction.
+  - name: storage
+    description: Private PDF uploads and object access.
 paths:
   /healthz:
     get:
@@ -24,7 +34,282 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      tags: [workspaces]
+      summary: List the signed-in user's workspaces
+      responses:
+        "200":
+          description: User workspaces.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workspace"
+    post:
+      operationId: createWorkspace
+      tags: [workspaces]
+      summary: Create a private workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceInput"
+      responses:
+        "201":
+          description: Created workspace.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [workspaces]
+      summary: Get workspace metrics, deadlines, activity, and recent documents
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Dashboard data for the selected workspace.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a private PDF upload URL
+      description: Returns a signed URL; the browser uploads file bytes directly to private object storage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlInput"
+      responses:
+        "200":
+          description: Upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlOutput"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List documents in a workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Documents in the workspace.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Register an uploaded private PDF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Document registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /documents/{documentId}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get document details
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Document details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Delete a document and its indexed content
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "204":
+          description: Document deleted.
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /documents/{documentId}/index:
+    post:
+      operationId: indexDocument
+      tags: [documents]
+      summary: Extract, embed, and index a PDF
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Updated indexing status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /assistant/ask:
+    post:
+      operationId: askDocuments
+      tags: [assistant]
+      summary: Ask a grounded question across indexed documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskDocumentsInput"
+      responses:
+        "200":
+          description: Answer with ranked source passages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskDocumentsOutput"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+  /analysis/compare:
+    post:
+      operationId: compareDocuments
+      tags: [analysis]
+      summary: Compare a criterion across two indexed documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompareDocumentsInput"
+      responses:
+        "200":
+          description: Sourced comparison.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompareDocumentsOutput"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+  /analysis/extract:
+    post:
+      operationId: extractDocument
+      tags: [analysis]
+      summary: Extract clauses, deadlines, or financial figures from an indexed PDF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractDocumentInput"
+      responses:
+        "200":
+          description: Structured extraction with source references.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractDocumentOutput"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
 components:
+  parameters:
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Invalid input.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    Unauthorized:
+      description: Sign-in required.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    Forbidden:
+      description: Access denied.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    Unprocessable:
+      description: The document could not be processed or did not contain enough evidence.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +318,224 @@ components:
           type: string
       required:
         - status
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Workspace:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        createdAt: { type: string, format: date-time }
+        documentCount: { type: integer }
+      required: [id, name, createdAt, documentCount]
+    WorkspaceInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+      required: [name]
+    Document:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        workspaceId: { type: string, format: uuid }
+        name: { type: string }
+        objectPath: { type: string }
+        mimeType: { type: string }
+        size: { type: integer }
+        status:
+          type: string
+          enum: [uploaded, indexing, ready, failed]
+        pageCount: { type: ["integer", "null"] }
+        chunkCount: { type: integer }
+        language: { type: ["string", "null"] }
+        uploadedAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        error: { type: ["string", "null"] }
+      required:
+        [id, workspaceId, name, objectPath, mimeType, size, status, pageCount, chunkCount, language, uploadedAt, updatedAt, error]
+    DocumentInput:
+      type: object
+      properties:
+        workspaceId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 255 }
+        mimeType: { type: string, enum: [application/pdf] }
+        size: { type: integer, minimum: 1, maximum: 52428800 }
+        objectPath: { type: string, minLength: 1 }
+      required: [workspaceId, name, mimeType, size, objectPath]
+    UploadUrlInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        size: { type: integer, minimum: 1, maximum: 52428800 }
+        contentType: { type: string, enum: [application/pdf] }
+      required: [name, size, contentType]
+    UploadUrlOutput:
+      type: object
+      properties:
+        uploadURL: { type: string, format: uri }
+        objectPath: { type: string }
+      required: [uploadURL, objectPath]
+    DashboardMetrics:
+      type: object
+      properties:
+        documentCount: { type: integer }
+        readyCount: { type: integer }
+        indexingCount: { type: integer }
+        deadlineCount: { type: integer }
+        reviewCount: { type: integer }
+      required: [documentCount, readyCount, indexingCount, deadlineCount, reviewCount]
+    Activity:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type:
+          type: string
+          enum: [upload, index, question, comparison, extraction]
+        title: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, type, title, createdAt]
+    UpcomingDeadline:
+      type: object
+      properties:
+        documentId: { type: string, format: uuid }
+        documentName: { type: string }
+        date: { type: string }
+        description: { type: string }
+        riskLevel:
+          type: string
+          enum: [low, medium, high]
+      required: [documentId, documentName, date, description, riskLevel]
+    Dashboard:
+      type: object
+      properties:
+        workspace:
+          $ref: "#/components/schemas/Workspace"
+        metrics:
+          $ref: "#/components/schemas/DashboardMetrics"
+        recentDocuments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+        upcomingDeadlines:
+          type: array
+          items:
+            $ref: "#/components/schemas/UpcomingDeadline"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+      required: [workspace, metrics, recentDocuments, upcomingDeadlines, recentActivity]
+    ChatTurn:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content: { type: string, maxLength: 12000 }
+      required: [role, content]
+    AskDocumentsInput:
+      type: object
+      properties:
+        workspaceId: { type: string, format: uuid }
+        question: { type: string, minLength: 1, maxLength: 4000 }
+        documentIds:
+          type: array
+          items: { type: string, format: uuid }
+          maxItems: 100
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatTurn"
+          maxItems: 20
+      required: [workspaceId, question]
+    Citation:
+      type: object
+      properties:
+        documentId: { type: string, format: uuid }
+        documentName: { type: string }
+        page: { type: integer, minimum: 1 }
+        excerpt: { type: string }
+        score: { type: number, minimum: 0, maximum: 1 }
+      required: [documentId, documentName, page, excerpt, score]
+    AskDocumentsOutput:
+      type: object
+      properties:
+        answer: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        notice: { type: string }
+      required: [answer, confidence, citations, notice]
+    CompareDocumentsInput:
+      type: object
+      properties:
+        workspaceId: { type: string, format: uuid }
+        documentAId: { type: string, format: uuid }
+        documentBId: { type: string, format: uuid }
+        criterion: { type: string, minLength: 1, maxLength: 240 }
+      required: [workspaceId, documentAId, documentBId, criterion]
+    ComparisonRow:
+      type: object
+      properties:
+        aspect: { type: string }
+        documentA: { type: string }
+        documentB: { type: string }
+        difference: { type: string }
+        citationsA:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        citationsB:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+      required: [aspect, documentA, documentB, difference, citationsA, citationsB]
+    CompareDocumentsOutput:
+      type: object
+      properties:
+        summary: { type: string }
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComparisonRow"
+      required: [summary, rows]
+    ExtractDocumentInput:
+      type: object
+      properties:
+        workspaceId: { type: string, format: uuid }
+        documentId: { type: string, format: uuid }
+        analysisType:
+          type: string
+          enum: [clauses, deadlines, financial]
+      required: [workspaceId, documentId, analysisType]
+    ExtractedItem:
+      type: object
+      properties:
+        label: { type: string }
+        value: { type: string }
+        date: { type: ["string", "null"], format: date }
+        riskLevel:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        citation:
+          $ref: "#/components/schemas/Citation"
+      required: [label, value, date, riskLevel, citation]
+    ExtractDocumentOutput:
+      type: object
+      properties:
+        analysisType:
+          type: string
+          enum: [clauses, deadlines, financial]
+        summary: { type: string }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtractedItem"
+      required: [analysisType, summary, items]
 
